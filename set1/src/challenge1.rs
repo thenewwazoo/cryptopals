@@ -13,7 +13,7 @@
 /// So go ahead and make that happen. You'll need to use this code for the rest of the exercises.
 
 pub fn b64_encode(hex_input: &str) -> String {
-    decode_hexstr(hex_input)
+    hex_decode(hex_input)
         .chunks(3)
         .map(|c| b64_map(c))
         .collect::<Vec<_>>()
@@ -21,7 +21,7 @@ pub fn b64_encode(hex_input: &str) -> String {
         .fold(String::new(), |acc, c| acc + &(c.iter().cloned().collect::<String>()))
 }
 
-pub fn decode_hexstr(hex_input: &str) -> Vec<u8> {
+pub fn hex_decode(hex_input: &str) -> Vec<u8> {
     hex_input
         .to_string()
         .to_lowercase()

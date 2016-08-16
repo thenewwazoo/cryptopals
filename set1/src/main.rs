@@ -5,6 +5,7 @@ mod challenge3;
 mod challenge4;
 mod challenge5;
 mod challenge6;
+mod challenge7;
 
 fn main() {
 
@@ -45,6 +46,12 @@ fn main() {
     );
     println!("Challenge 5 okay");
 
+    // Challenge 6
     assert_eq!(String::from_utf8(challenge6::decipher_text("6.txt")).unwrap(), "Terminator X: Bring the noise");
     println!("Challenge 6 okay");
+
+    // Challenge 7
+    let c7score = challenge3::score_attempt(&String::from_utf8(challenge7::decrypt_file("7.txt", "YELLOW SUBMARINE".as_bytes())).unwrap());
+    assert!(c7score < 0.05);
+    println!("Challenge 7 okay");
 }

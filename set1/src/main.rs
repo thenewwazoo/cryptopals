@@ -2,6 +2,7 @@
 mod challenge1;
 mod challenge2;
 mod challenge3;
+mod challenge4;
 
 fn main() {
 
@@ -25,4 +26,9 @@ fn main() {
         challenge3::decrypt_message("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"),
         "Cooking MC's like a pound of bacon");
     println!("Challenge 3 okay");
+
+    // Challenge 4
+    assert!(challenge4::do_find_ciphertext("4.txt", "Now that the party is jumping\n"));
+    println!("Challenge 4 okay");
+
 }

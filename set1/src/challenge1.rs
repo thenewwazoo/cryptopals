@@ -16,8 +16,6 @@ pub fn b64_encode(hex_input: &str) -> String {
     hex_decode(hex_input)
         .chunks(3)
         .map(|c| b64_map(c))
-        .collect::<Vec<_>>()
-        .iter()
         .fold(String::new(), |acc, c| acc + &(c.iter().cloned().collect::<String>()))
 }
 

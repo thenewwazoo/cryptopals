@@ -22,19 +22,15 @@
 // password file. Your .sig file. Get a feel for it. I promise, we aren't wasting your time with
 // this.
 
-pub fn rcx(key: &[u8], plaintext: &str) -> String {
-    hex_encode(
-        plaintext
-        .as_bytes()
+pub fn rcx(key: &[u8], plaintext: &[u8]) -> Vec<u8> {
+    plaintext
         .iter()
         .zip(key.iter().cycle())
         .map(|(b, k)| b ^ k)
         .collect::<Vec<u8>>()
-        .as_slice()
-    )
 }
 
-fn hex_encode(bytes: &[u8]) -> String {
+pub fn hex_encode(bytes: &[u8]) -> String {
     bytes
         .iter()
         .flat_map(|&b| nibble_map(b).into_iter())

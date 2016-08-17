@@ -6,6 +6,7 @@ mod challenge4;
 mod challenge5;
 mod challenge6;
 mod challenge7;
+mod challenge8;
 
 fn main() {
 
@@ -54,4 +55,8 @@ fn main() {
     let c7score = challenge3::score_attempt(&String::from_utf8(challenge7::decrypt_file("7.txt", "YELLOW SUBMARINE".as_bytes())).unwrap());
     assert!(c7score < 0.05);
     println!("Challenge 7 okay");
+
+    // Challenge 8
+    assert_eq!("d8806197", &challenge8::detect_ecb("8.txt")[..8]);
+    println!("Challenge 8 okay");
 }

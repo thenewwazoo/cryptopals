@@ -21,39 +21,23 @@ use std::io::BufRead;
 use std::fs::File;
 
 use self::data_encoding::base64;
-use self::crypto::aes::{self, KeySize};
-use self::crypto::blockmodes::NoPadding;
-use self::crypto::buffer::{self, WriteBuffer, ReadBuffer, BufferResult};
-use self::crypto::symmetriccipher;
+use self::crypto::aessafe::AesSafe128Decryptor;
+use self::crypto::symmetriccipher::BlockDecryptor;
 
 pub fn decrypt_file(filename: &str, key: &[u8]) -> Vec<u8> {
-    let ciphertext = base64::decode(
-        BufReader::new(File::open(filename).unwrap())
-        .lines()
-        .fold(String::new(), |acc, l| acc + &(l.unwrap()))
-        .as_bytes()
-        ).unwrap();
+    let decryptor = AesSafe128Decryptor::new(key);
 
-    decrypt(&ciphertext[..], key).unwrap()
-}
-
-// why the hell do I have to juggle buffers to do this? why the hell are all the BlockEngine structs private?
-pub fn decrypt(ciphertext: &[u8], key: &[u8]) -> Result<Vec<u8>, symmetriccipher::SymmetricCipherError> {
-    let mut decryptor = aes::ecb_decryptor(KeySize::KeySize128, key, NoPadding);
-
-    let mut final_result = Vec::<u8>::new();
-    let mut read_buffer = buffer::RefReadBuffer::new(ciphertext);
-    let mut buffer = [0; 4096];
-    let mut write_buffer = buffer::RefWriteBuffer::new(&mut buffer);
-
-    loop {
-        let result = try!(decryptor.decrypt(&mut read_buffer, &mut write_buffer, true));
-        final_result.extend(write_buffer.take_read_buffer().take_remaining().iter().map(|&i| i));
-        match result {
-            BufferResult::BufferUnderflow => break,
-            BufferResult::BufferOverflow => { }
-        }
-    }
-
-    Ok(final_result)
+    base64::decode(
+            BufReader::new(File::open(filename).unwrap())
+            .lines()
+            .fold(String::new(), |acc, l| acc + &(l.unwrap()))
+            .as_bytes()
+        ).unwrap()
+        .chunks(16)
+        .flat_map(|c| {
+            let mut output = vec![0; 16];
+            decryptor.decrypt_block(c, output.as_mut_slice());
+            output
+        })
+        .collect::<Vec<u8>>()
 }

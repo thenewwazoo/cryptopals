@@ -7,6 +7,8 @@ mod challenge5;
 mod challenge6;
 mod challenge7;
 mod challenge8;
+mod challenge9;
+
 
 fn main() {
 
@@ -59,4 +61,11 @@ fn main() {
     // Challenge 8
     assert_eq!("d8806197", &challenge8::detect_ecb("8.txt")[..8]);
     println!("Challenge 8 okay");
+
+    assert_eq!(
+        challenge9::do_challenge9(),
+        "YELLOW SUBMARINE\x04\x04\x04\x04".as_bytes().to_vec()
+        );
+    println!("Challenge 9 okay");
+
 }

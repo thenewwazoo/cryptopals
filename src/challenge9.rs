@@ -18,7 +18,7 @@
 //
 // "YELLOW SUBMARINE\x04\x04\x04\x04"
 
-pub fn do_challenge1() -> Vec<u8> {
+pub fn do_challenge() -> Vec<u8> {
     pad_block("YELLOW SUBMARINE".as_bytes(), 20, b'\x04').unwrap()
 }
 

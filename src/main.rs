@@ -1,4 +1,11 @@
 
+extern crate data_encoding;
+
+use std::io::BufReader;
+use std::io::BufRead;
+use std::fs::File;
+use self::data_encoding::base64;
+
 mod challenge1;
 mod challenge2;
 mod challenge3;
@@ -8,7 +15,7 @@ mod challenge6;
 mod challenge7;
 mod challenge8;
 mod challenge9;
-
+mod challenge10;
 
 fn main() {
 
@@ -63,9 +70,26 @@ fn main() {
     println!("Challenge 8 okay");
 
     assert_eq!(
-        challenge9::do_challenge9(),
+        challenge9::do_challenge(),
         "YELLOW SUBMARINE\x04\x04\x04\x04".as_bytes().to_vec()
         );
     println!("Challenge 9 okay");
+
+    assert_eq!(
+        BufReader::new(File::open("10.txt").unwrap())
+        .lines()
+        .fold(String::new(), |acc, l| acc + &(l.unwrap()))
+        .as_bytes()
+        .to_vec(),
+        base64::encode(
+            challenge10::cbc_encrypt(
+                challenge10::cbc_decrypt_file("10.txt", "YELLOW SUBMARINE".as_bytes(), &[0 as u8; 16]).as_slice(),
+                "YELLOW SUBMARINE".as_bytes(),
+                &[0 as u8; 16]
+                ).as_slice()
+            ).as_bytes()
+        )
+    println!("Challenge 10 okay");
+
 
 }

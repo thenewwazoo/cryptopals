@@ -16,6 +16,7 @@ mod challenge7;
 mod challenge8;
 mod challenge9;
 mod challenge10;
+mod challenge11;
 
 fn main() {
 
@@ -88,8 +89,10 @@ fn main() {
                 &[0 as u8; 16]
                 ).as_slice()
             ).as_bytes()
-        )
+        );
     println!("Challenge 10 okay");
 
+    challenge11::ecb_oracle();
+    println!("Challenge 11 okay");
 
 }

@@ -6,3 +6,4 @@ authors = ["Brandon Matthews <bmatt@optimaltour.us>"]
 [dependencies]
 data-encoding = "1.1.2"
 rust-crypto = "^0.2"
+rand = "0.3"

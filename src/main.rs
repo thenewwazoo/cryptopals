@@ -66,7 +66,7 @@ fn main() {
     println!("Challenge 7 okay");
 
     // Challenge 8
-    assert_eq!("d8806197", &challenge8::detect_ecb("8.txt")[..8]);
+    assert_eq!("d8806197", &challenge8::detect_ecb_line("8.txt").expect("No line detected as ECB")[..8]);
     println!("Challenge 8 okay");
 
     assert_eq!(

@@ -11,40 +11,39 @@
 // Remember that the problem with ECB is that it is stateless and deterministic; the same 16 byte
 // plaintext block will always produce the same 16 byte ciphertext.
 
+
 use std::collections::HashMap;
 use std::io::BufReader;
 use std::io::BufRead;
 use std::fs::File;
+use challenge1::hex_decode;
 
-pub fn detect_ecb(filename: &str) -> String {
+pub fn detect_ecb(ciphertext: &[u8]) -> bool {
+    let chunks = ciphertext.chunks(16);
+    let mut map: HashMap<&[u8], u32> = HashMap::new();
+    for chunk in chunks {
+        *map.entry(chunk).or_insert(0) += 1;
+    }
+    for (_, count) in map {
+        if count > 1 {
+            return true;
+        }
+    }
+    false
+}
 
-    let mut result = String::new();
-    let mut freq_maps: HashMap<String, HashMap<[u32; 4], u32>> = HashMap::new();
+pub fn detect_ecb_line(filename: &str) -> Option<String> {
+
+    let mut is_ecb: HashMap<String, bool> = HashMap::new();
     for line in BufReader::new(File::open(filename).unwrap()).lines() {
         let line = line.unwrap();
-        let mut freq_map: HashMap<[u32; 4], u32> = HashMap::new();
-        let chunks = line
-            .as_bytes()
-            .chunks(32) // 32 halfwords = 128 bits
-            .map(|c| c
-                 .chunks(8) // 8 halfwords = 32 bits
-                 .map(|c| u32::from_str_radix(&String::from_utf8(c.to_vec()).unwrap(), 16).unwrap() )
-                 .collect::<Vec<u32>>()
-                 )
-            .map(|v| [v[0], v[1], v[2], v[3]])
-            .collect::<Vec<[u32; 4]>>();
-        for chunk in chunks {
-            *freq_map.entry(chunk).or_insert(0) += 1;
-        }
-        freq_maps.insert(line, freq_map);
+        let decoded = hex_decode(&line);
+        is_ecb.insert(line, detect_ecb(&decoded));
     }
-    for (line, map) in freq_maps {
-        for (_, &v) in map.iter() {
-            if v > 1 {
-                result = line.clone();
-                break;
-            }
+    for (line, is_line_ecb) in is_ecb {
+        if is_line_ecb {
+            return Some(line);
         }
     }
-    result
+    None
 }

@@ -12,23 +12,42 @@
 ///
 /// So go ahead and make that happen. You'll need to use this code for the rest of the exercises.
 
-pub fn b64_encode(hex_input: &str) -> String {
-    hex_decode(hex_input)
-        .chunks(3)
-        .map(|c| b64_map(c))
-        .fold(String::new(), |acc, c| acc + &(c.iter().cloned().collect::<String>()))
+pub trait ToBase64 {
+    fn to_base64(&self) -> String;
 }
 
-pub fn hex_decode(hex_input: &str) -> Vec<u8> {
-    hex_input
-        .to_string()
-        .to_lowercase()
-        .chars()
-        .map(hex_map)
-        .collect::<Vec<u8>>()
-        .chunks(2)
-        .map(|c| (c[0]<<4) + c[1])
-        .collect()
+impl<'a> ToBase64 for &'a [u8] {
+    fn to_base64(&self) -> String {
+        self
+            .chunks(3)
+            .map(|c| b64_map(c))
+            .fold(String::new(), |acc, c| acc + &c.iter().cloned().collect::<String>())
+    }
+}
+
+pub trait FromHex {
+    fn decode_hex(&self) -> Vec<u8>;
+}
+
+impl<'a> FromHex for &'a str {
+    fn decode_hex(&self) -> Vec<u8> {
+        self
+            .to_string()
+            .to_lowercase()
+            .chars()
+            .map(hex_map)
+            .collect::<Vec<u8>>()
+            .chunks(2)
+            .map(|c| (c[0]<<4)+c[1])
+            .collect()
+    }
+}
+
+// Deref coersion seems to be wonky? so this.
+impl<'a> FromHex for String {
+    fn decode_hex(&self) -> Vec<u8> {
+        (&self[..]).decode_hex()
+    }
 }
 
 pub fn hex_map(c: char) -> u8 {

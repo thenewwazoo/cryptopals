@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use std::io::BufReader;
 use std::io::BufRead;
 use std::fs::File;
-use challenge1::hex_decode;
+use challenge1::FromHex;
 
 pub fn detect_ecb(ciphertext: &[u8]) -> bool {
     let chunks = ciphertext.chunks(16);
@@ -37,7 +37,7 @@ pub fn detect_ecb_line(filename: &str) -> Option<String> {
     let mut is_ecb: HashMap<String, bool> = HashMap::new();
     for line in BufReader::new(File::open(filename).unwrap()).lines() {
         let line = line.unwrap();
-        let decoded = hex_decode(&line);
+        let decoded = line.decode_hex();
         is_ecb.insert(line, detect_ecb(&decoded));
     }
     for (line, is_line_ecb) in is_ecb {

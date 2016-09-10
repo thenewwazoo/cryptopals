@@ -52,7 +52,7 @@ pub fn decipher_text(filename: &str) -> Vec<u8> {
         .iter()
         .map(|r| r[0].1)
         .collect();
-    let _ = String::from_utf8(challenge5::rcx(key.as_slice(), ciphertext.as_slice())).unwrap();
+    let _ = String::from_utf8(challenge5::rcx(&key, &ciphertext)).unwrap();
 
     //println!("Key: {:?}\nPlaintext:\n----\n{}", key, plaintext);
     key

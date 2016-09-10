@@ -30,11 +30,17 @@ pub fn rcx(key: &[u8], plaintext: &[u8]) -> Vec<u8> {
         .collect::<Vec<u8>>()
 }
 
-pub fn hex_encode(bytes: &[u8]) -> String {
-    bytes
-        .iter()
-        .flat_map(|&b| nibble_map(b).into_iter())
-        .collect()
+pub trait ToHex {
+    fn encode_hex(&self) -> String;
+}
+
+impl<'a> ToHex for &'a [u8] {
+    fn encode_hex(&self) -> String {
+        self
+            .iter()
+            .flat_map(|&b| nibble_map(b).into_iter())
+            .collect()
+    }
 }
 
 fn nibble_map(b: u8) -> Vec<char> {

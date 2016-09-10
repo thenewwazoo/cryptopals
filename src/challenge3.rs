@@ -17,12 +17,12 @@ use std::cmp::Ordering::Greater;
 use std::collections::HashMap;
 use std::f32;
 
-use challenge1;
 use challenge2;
 
+use challenge1::FromHex;
+
 pub fn decrypt_message(ciphertext: &str) -> String {
-    let results = search_xor_space(
-            &challenge1::hex_decode(ciphertext));
+    let results = search_xor_space(&ciphertext.decode_hex());
     results[0].2.clone()
 }
 

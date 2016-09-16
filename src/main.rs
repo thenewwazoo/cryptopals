@@ -17,6 +17,7 @@ mod challenge8;
 mod challenge9;
 mod challenge10;
 mod challenge11;
+mod challenge12;
 
 use challenge1::ToBase64;
 use challenge1::FromHex;
@@ -99,5 +100,15 @@ fn main() {
 
     challenge11::ecb_oracle();
     println!("Challenge 11 okay");
+
+    assert_eq!(
+        challenge12::do_12(),
+        r#"Rollin' in my 5.0
+With my rag-top down so my hair can blow
+The girlies on standby waving just to say hi
+Did you stop? No, I just drove by
+"#
+        );
+    println!("Challenge 12 okay");
 
 }

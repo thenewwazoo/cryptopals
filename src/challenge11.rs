@@ -31,6 +31,7 @@ use self::rand::Rng;
 use self::crypto::aessafe::AesSafe128Encryptor;
 use self::crypto::symmetriccipher::BlockEncryptor;
 
+use challenge9::pad_block;
 use challenge8::detect_ecb;
 use challenge10;
 
@@ -44,7 +45,7 @@ pub fn ecb_oracle() {
     }
 }
 
-fn generate_key(size: usize) -> Vec<u8> {
+pub fn generate_key(size: usize) -> Vec<u8> {
     let mut output: Vec<u8> = Vec::with_capacity(size);
     let mut rng = rand::thread_rng();
 
@@ -76,12 +77,14 @@ pub fn encryption_butterfly(plaintext: &[u8]) -> (Vec<u8>, Vec<u8>, bool) {
 }
 
 pub fn ecb_encrypt(plaintext: &[u8], key: &[u8]) -> Vec<u8> {
-    let encryptor = AesSafe128Encryptor::new(key);
+    let key = pad_block(key, 16, b'\x00');
+    let encryptor = AesSafe128Encryptor::new(&(key.unwrap()));
     let mut output: Vec<u8> = Vec::with_capacity(plaintext.len());
 
     for block in plaintext.chunks(16) {
         let mut result = vec![0; 16];
-        encryptor.encrypt_block(block, &mut result);
+        let block = pad_block(block, 16, b'\x00');
+        encryptor.encrypt_block(block.unwrap().as_slice(), &mut result);
         output.append(&mut result);
     }
     output

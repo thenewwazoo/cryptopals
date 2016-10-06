@@ -18,10 +18,12 @@ mod challenge9;
 mod challenge10;
 mod challenge11;
 mod challenge12;
+mod challenge13;
 
 use challenge1::ToBase64;
 use challenge1::FromHex;
 use challenge5::ToHex;
+use challenge11::generate_key;
 
 fn main() {
 
@@ -110,5 +112,17 @@ Did you stop? No, I just drove by
 "#
         );
     println!("Challenge 12 okay");
+
+
+    let key = generate_key(16);
+    assert_eq!(
+        challenge13::User{
+            email: "root+aaaaaaaaaaaaaa@cnn.com".to_string(), // fudge this a bit. it'd work in real life
+            uid: 10,
+            role: "admin".to_string()
+        }.encode(),
+        challenge13::decrypt_profile(&challenge13::fake_profile(&key, "root", "cnn.com"), &key).encode()
+    );
+    println!("Challenge 13 okay");
 
 }

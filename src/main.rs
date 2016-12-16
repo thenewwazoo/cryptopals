@@ -1,128 +1,42 @@
 
-extern crate data_encoding;
+// Welcome to my implementation of the solutions to the Cryptopals challenges! Do stay a while,
+// won't you?
 
-use std::io::BufReader;
-use std::io::BufRead;
-use std::fs::File;
-use self::data_encoding::base64;
+extern crate cryptopals;
 
-mod challenge1;
-mod challenge2;
-mod challenge3;
-mod challenge4;
-mod challenge5;
-mod challenge6;
-mod challenge7;
-mod challenge8;
-mod challenge9;
-mod challenge10;
-mod challenge11;
-mod challenge12;
-mod challenge13;
+use cryptopals::util::base64::FromBase64;
 
-use challenge1::ToBase64;
-use challenge1::FromHex;
-use challenge5::ToHex;
-use challenge11::generate_key;
+fn check_success(challenge_num: u32, result: Result<String, String>)
+{
+    match result {
+        Ok(output) => println!(
+            "Challenge {} okay! Got delicious output:\n{}\n----",
+            challenge_num,
+            output
+            ),
+        Err(errmsg) => panic!("Challenge {} returned an error!\n{}", challenge_num, errmsg)
+    }
+}
 
-fn main() {
-
-    // Challenge 1
-    assert_eq!(
-        "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
-        .decode_hex()
-        .as_slice()
-        .to_base64(),
-        "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t".to_string());
-    println!("Challenge 1 okay");
-
-    // Challenge 2
-    assert_eq!(
-        challenge2::fixed_xor(
-            "1c0111001f010100061a024b53535009181c".decode_hex().as_slice(),
-            "686974207468652062756c6c277320657965".decode_hex().as_slice()),
-        "746865206b696420646f6e277420706c6179".decode_hex());
-    println!("Challenge 2 okay");
-
-    // Challenge 3
-    assert_eq!(
-        challenge3::decrypt_message("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"),
-        "Cooking MC's like a pound of bacon");
-    println!("Challenge 3 okay");
-
-    // Challenge 4
-    assert!(challenge4::do_find_ciphertext("4.txt", "Now that the party is jumping\n"));
-    println!("Challenge 4 okay");
-
-    // Challenge 5
-    assert_eq!(
-        challenge5::rcx(
-            "ICE".as_bytes(),
-            "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal".as_bytes()
-            ).as_slice()
-        .encode_hex(),
-        "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f"
-        );
-    println!("Challenge 5 okay");
-
-    // Challenge 6
-    assert_eq!(String::from_utf8(challenge6::decipher_text("6.txt")).unwrap(), "Terminator X: Bring the noise");
-    println!("Challenge 6 okay");
-
-    // Challenge 7
-    let c7score = challenge3::score_attempt(&String::from_utf8(challenge7::decrypt_file("7.txt", "YELLOW SUBMARINE".as_bytes())).unwrap());
-    assert!(c7score < 0.05);
-    println!("Challenge 7 okay");
-
-    // Challenge 8
-    assert_eq!("d8806197", &challenge8::detect_ecb_line("8.txt").expect("No line detected as ECB")[..8]);
-    println!("Challenge 8 okay");
-
-    assert_eq!(
-        challenge9::do_challenge(),
-        "YELLOW SUBMARINE\x04\x04\x04\x04".as_bytes().to_vec()
-        );
-    println!("Challenge 9 okay");
-
-    assert_eq!(
-        BufReader::new(File::open("10.txt").unwrap())
-        .lines()
-        .fold(String::new(), |acc, l| acc + &(l.unwrap()))
-        .as_bytes()
-        .to_vec(),
-        base64::encode(
-            challenge10::cbc_encrypt(
-                challenge10::cbc_decrypt_file("10.txt", "YELLOW SUBMARINE".as_bytes(), &[0 as u8; 16]).as_slice(),
-                "YELLOW SUBMARINE".as_bytes(),
-                &[0 as u8; 16]
-                ).as_slice()
-            ).as_bytes()
-        );
-    println!("Challenge 10 okay");
-
-    challenge11::ecb_oracle();
-    println!("Challenge 11 okay");
-
-    assert_eq!(
-        challenge12::do_12(),
-        r#"Rollin' in my 5.0
-With my rag-top down so my hair can blow
-The girlies on standby waving just to say hi
-Did you stop? No, I just drove by
-"#
-        );
-    println!("Challenge 12 okay");
-
-
-    let key = generate_key(16);
-    assert_eq!(
-        challenge13::User{
-            email: "root+aaaaaaaaaaaaaa@cnn.com".to_string(), // fudge this a bit. it'd work in real life
-            uid: 10,
-            role: "admin".to_string()
-        }.encode(),
-        challenge13::decrypt_profile(&challenge13::fake_profile(&key, "root", "cnn.com"), &key).encode()
-    );
-    println!("Challenge 13 okay");
-
+fn main()
+{
+    check_success(1, match cryptopals::challenge1() {
+        Ok(output) => Result::Ok(String::from_utf8(output.from_base64()).unwrap()),
+        Err(errstr) => Err(errstr)
+    });
+    check_success(2, match cryptopals::challenge2() {
+        Ok(output) => Result::Ok(String::from_utf8(output).unwrap()),
+        Err(errstr) => Err(errstr)
+    });
+    check_success(3, cryptopals::challenge3());
+    check_success(4, cryptopals::challenge4());
+    check_success(5, cryptopals::challenge5());
+    check_success(6, cryptopals::challenge6());
+    check_success(7, cryptopals::challenge7());
+    check_success(8, cryptopals::challenge8());
+    check_success(9, cryptopals::challenge9());
+    check_success(10, cryptopals::challenge10());
+    check_success(11, cryptopals::challenge11());
+    check_success(12, cryptopals::challenge12());
+    check_success(13, cryptopals::challenge13());
 }

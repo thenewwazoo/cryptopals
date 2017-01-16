@@ -21,8 +21,8 @@
 use util::pkcs7_pad;
 
 pub fn challenge9() -> Result<String, String> {
-    let input_block = "YELLOW SUBMARINE".as_bytes();
-    let known_good = "YELLOW SUBMARINE\x04\x04\x04\x04".as_bytes();
+    let input_block = b"YELLOW SUBMARINE";
+    let known_good = b"YELLOW SUBMARINE\x04\x04\x04\x04";
     let desired_len = 20;
 
     let padded = pkcs7_pad(input_block, 20).unwrap();

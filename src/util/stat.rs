@@ -8,13 +8,14 @@ use util::bit_manip::bytewise_xor;
 // XOR each byte of ciphertext with each value of a byte 0..254. For each resultant byte string,
 // convert to a utf8 String; if successful, score the likelihood of that result being English text.
 // Return a list of scores, byte values, and the resulting strings.
-pub fn score_byte_space(ciphertext: &Vec<u8>) -> Vec<(f32, u8, String)> {
+// pub fn score_byte_space(ciphertext: &Vec<u8>) -> Vec<(f32, u8, String)> {
+pub fn score_byte_space(ciphertext: &[u8]) -> Vec<(f32, u8, String)> {
     let mut scores: Vec<(f32, u8, String)> = (0..254)
         .map(|k| {
-            (k, String::from_utf8(bytewise_xor(&ciphertext, vec![k; ciphertext.len()].as_slice())))
+            (k, String::from_utf8(bytewise_xor(ciphertext, vec![k; ciphertext.len()].as_slice())))
         })
-        .filter(|&(_, ref b)| match b {
-            &Ok(_) => true,
+        .filter(|&(_, ref b)| match *b {
+            Ok(_) => true,
             _ => false,
         })
         .map(|(k, b)| {
@@ -73,7 +74,7 @@ pub fn score_plaintext(plaintext: &str) -> f32 {
     let count = count_chars(&clean_text);
     let pct_non_alpha = (plaintext.len() - clean_text.len()) as f32 / plaintext.len() as f32;
 
-    let freq_distance = if clean_text.len() != 0 {
+    let freq_distance = if !clean_text.is_empty() {
         chisq(normalize_frequencies(count, clean_text.len()), freq_map)
     } else {
         f32::MAX // if there are no alphanumeric characters it's probably not English
@@ -94,7 +95,7 @@ fn count_chars(text: &str) -> HashMap<char, u32> {
 
 fn normalize_frequencies(count: HashMap<char, u32>, length: usize) -> HashMap<char, f32> {
     let mut normed: HashMap<char, f32> = HashMap::new();
-    for (&c, &n) in count.iter() {
+    for (&c, &n) in &count {
         let _ = normed.insert(c, n as f32 / length as f32);
     }
     normed
@@ -105,7 +106,7 @@ fn chisq(input: HashMap<char, f32>, baseline: HashMap<char, f32>) -> f32 {
         .collect::<Vec<_>>()
         .iter()
         .map(|&(ch, &pct)| {
-            let g = baseline.get(ch).unwrap();
+            let g = baseline[ch];
             let f = pct;
             (f - g) * (f - g) / (f + g)
         })

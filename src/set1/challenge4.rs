@@ -17,8 +17,7 @@ use std::cmp::Ordering::Greater;
 use util::hex::FromHex;
 use util::stat::score_byte_space;
 
-pub fn challenge4() -> Result<String, String>
-{
+pub fn challenge4() -> Result<String, String> {
     let known_plaintext = "Now that the party is jumping\n";
     let filename = "4.txt";
 
@@ -26,9 +25,9 @@ pub fn challenge4() -> Result<String, String>
         .lines()
         .map(|line| line.unwrap())
         .map(|line| score_byte_space(&line.decode_hex()))
-        .filter(|r| r.len() > 0)    // filter out lines w/ no valid outputs in the xor space
+        .filter(|r| !r.is_empty())  // filter out lines w/ no valid outputs in the xor space
         .map(|r| r[0].clone())      // take the highest-scoring result from each line we search
-        .filter(|ref r| r.0 < 0.05) // keep sufficiently high-scoring results across all lines
+        .filter(|r| r.0 < 0.05) // keep sufficiently high-scoring results across all lines
         .collect();
     results.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(Greater));
     let winner = results[0].2.clone();

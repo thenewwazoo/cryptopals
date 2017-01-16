@@ -19,21 +19,20 @@ use util::hex::{FromHex, ToHex};
 use util::oracles::detect_ecb;
 use util::encryption::EncryptionMode;
 
-pub fn challenge8() -> Result<String, String>
-{
+pub fn challenge8() -> Result<String, String> {
     let filename = "8.txt";
 
     let ecb_lines = BufReader::new(File::open(filename).unwrap())
         .lines()
         .map(|l| l.unwrap().decode_hex())
-        .filter(|l| match detect_ecb(&l) {
+        .filter(|l| match detect_ecb(l) {
             EncryptionMode::AesEcb => true,
-            EncryptionMode::AesCbc => false
+            EncryptionMode::AesCbc => false,
         })
         .map(|v| v.encode_hex())
         .collect::<Vec<String>>();
     if ecb_lines.len() == 1 {
-        let ref result = ecb_lines[0];
+        let result = &ecb_lines[0];
         Ok(String::from(&result[..8]))
     } else {
         Err(format!("Found {} lines that seem to be ecb. wtf?", ecb_lines.len()))

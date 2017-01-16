@@ -11,7 +11,7 @@
 ///
 /// Decrypt it. You know the key, after all.
 ///
-/// Easiest way: use OpenSSL::Cipher and give it AES-128-ECB as the cipher.
+/// Easiest way: use `OpenSSL::Cipher` and give it AES-128-ECB as the cipher.
 
 extern crate crypto;
 
@@ -25,26 +25,24 @@ use self::crypto::symmetriccipher::BlockDecryptor;
 use util::base64::FromBase64;
 use util::stat::score_plaintext;
 
-pub fn challenge7() -> Result<String, String>
-{
-	let filename = "7.txt";
-	let key = "YELLOW SUBMARINE".as_bytes();
+pub fn challenge7() -> Result<String, String> {
+    let filename = "7.txt";
+    let key = b"YELLOW SUBMARINE";
 
     let decryptor = AesSafe128Decryptor::new(key);
 
-    let plaintext = String::from_utf8(
-        BufReader::new(File::open(filename).unwrap())
-        .lines()
-        .fold(String::new(), |acc, l| acc + &(l.unwrap()))
-        .from_base64()
-        .chunks(16)
-        .flat_map(|c| {
-            let mut output = vec![0; 16];
-            decryptor.decrypt_block(c, output.as_mut_slice());
-            output
-        })
-        .collect::<Vec<u8>>()
-        ).unwrap();
+    let plaintext = String::from_utf8(BufReader::new(File::open(filename).unwrap())
+            .lines()
+            .fold(String::new(), |acc, l| acc + &(l.unwrap()))
+            .from_base64()
+            .chunks(16)
+            .flat_map(|c| {
+                let mut output = vec![0; 16];
+                decryptor.decrypt_block(c, output.as_mut_slice());
+                output
+            })
+            .collect::<Vec<u8>>())
+        .unwrap();
 
     if score_plaintext(&plaintext) < 0.05 {
         Ok(String::from(plaintext))

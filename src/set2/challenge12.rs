@@ -9,10 +9,12 @@
 /// Now take that same function and have it append to the plaintext, BEFORE ENCRYPTING, the
 /// following string:
 ///
+/// ```
 ///     Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkg
 ///     aGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBq
 ///     dXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUg
 ///     YnkK
+/// ```
 ///
 /// Base64 decode the string before appending it. Do not base64 decode the string by hand; make your
 /// code do it. The point is that you don't know its contents.
@@ -75,13 +77,16 @@ pub fn challenge12() -> Result<String, String> {
 
             let start_idx = which_block * block_size;
             let mut one_short = vec![b'A'; block_size-1 - (foundbytes.len() % block_size)];
-            let block = appended_encrypt(&one_short, &key)[start_idx..start_idx + block_size].to_vec();
+            let block = appended_encrypt(&one_short, &key)[start_idx..start_idx + block_size]
+                .to_vec();
             one_short.extend(&foundbytes);
             let mut byte_dict: HashMap<Vec<u8>, u8> = HashMap::new();
             for b in u8::MIN..u8::MAX {
                 let mut inblock = one_short.clone();
                 inblock.push(b as u8);
-                byte_dict.insert(appended_encrypt(&inblock, &key)[start_idx..start_idx+block_size].to_vec(), b as u8);
+                byte_dict.insert(appended_encrypt(&inblock, &key)[start_idx..start_idx + block_size]
+                                .to_vec(),
+                            b as u8);
             }
 
             let foundbyte = match byte_dict.get(&block) {

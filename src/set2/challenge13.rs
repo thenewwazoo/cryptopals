@@ -4,7 +4,9 @@
 ///
 /// Write a k=v parsing routine, as if for a structured cookie. The routine should take:
 ///
+/// ```
 ///     foo=bar&baz=qux&zap=zazzle
+/// ```
 ///
 /// ... and produce:
 ///
@@ -19,21 +21,27 @@
 /// Now write a function that encodes a user profile in that format, given an email address.
 /// You should have something like:
 ///
+/// ```
 ///     profile_for("foo@bar.com")
+/// ```
 ///
 /// ... and it should produce:
 ///
+/// ```
 ///     {
 ///         email: 'foo@bar.com',
 ///         uid: 10,
 ///         role: 'user'
 ///     }
+/// ```
 ///
 /// ... encoded as:
 ///
+/// ```
 ///     email=foo@bar.com&uid=10&role=user
+/// ```
 ///
-/// Your "profile_for" function should not allow encoding metacharacters (& and =). Eat
+/// Your `profile_for` function should not allow encoding metacharacters (& and =). Eat
 /// them, quote them, whatever you want to do, but don't let people set their email
 /// address to "foo@bar.com&role=admin".
 ///
@@ -42,7 +50,7 @@
 /// A. Encrypt the encoded user profile under the key; "provide" that to the "attacker".
 /// B. Decrypt the encoded user profile and parse it.
 ///
-/// Using only the user input to profile_for() (as an oracle to generate "valid"
+/// Using only the user input to `profile_for()` (as an oracle to generate "valid"
 /// ciphertexts) and the ciphertexts themselves, make a role=admin profile.
 
 use std::collections::HashMap;
@@ -98,7 +106,7 @@ fn encrypt_profile(profile: &str, key: &[u8]) -> Vec<u8> {
 }
 
 fn decrypt_profile(profile: &[u8], key: &[u8]) -> Result<User, String> {
-    let decrypted = match String::from_utf8(ecb_decrypt(profile, &key)) {
+    let decrypted = match String::from_utf8(ecb_decrypt(profile, key)) {
         Ok(s) => s,
         _ => return Err(String::from("could not build a string from decrypted profile")),
     };
@@ -139,7 +147,7 @@ pub fn challenge13() -> Result<String, String> {
     //
     // where the '.' in the block are PKCS#7 padding.
     //
-    let admin_input = String::from_utf8(pkcs7_pad("admin".as_bytes(), 16)?).unwrap();
+    let admin_input = String::from_utf8(pkcs7_pad(b"admin", 16)?).unwrap();
     let final_block =
         encrypt_profile(&profile_for(&format!("xxxxxxxxxx{}", admin_input))?, &key)[16..32]
             .to_vec();

@@ -11,8 +11,10 @@
 ///
 /// The function should look like:
 ///
+/// ```
 ///     encryption_oracle(your-input)
 ///     => [MEANINGLESS JIBBER JABBER]
+/// ```
 ///
 /// Under the hood, have the function append 5-10 bytes (count chosen randomly) before the plaintext
 /// and 5-10 bytes after the plaintext.

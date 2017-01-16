@@ -35,15 +35,16 @@ impl<'a> ToBase64 for &'a [u8] {
     }
 }
 
-/// Maps a slice, of as many as three bytes, into four base64 characters (including padding)
-///
-///  # Examples
-/// assert_eq!( b64_map([0x4d, 0x61, 0x6e]), ['T', 'W', 'F', 'u'] );
-/// assert_eq!( b64_map([0x4d]), ['T', 'Q', '=', '='] );
-///
+// Maps a slice, of as many as three bytes, into four base64 characters (including padding)
+//
+// ```
+// assert_eq!( b64_map([0x4d, 0x61, 0x6e]), ['T', 'W', 'F', 'u'] );
+// assert_eq!( b64_map([0x4d]), ['T', 'Q', '=', '='] );
+// ```
+//
 fn b64_map(bytes: &[u8]) -> [char; 4] {
     // base64 alphabet, plus the pad character at the end
-    let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".as_bytes();
+    let alphabet = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
     // `triword` is a 24-bit representation of `bytes` (stored in a u32)
     let triword: u32 = bytes.iter()

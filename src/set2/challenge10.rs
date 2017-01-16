@@ -20,10 +20,9 @@
 
 use util::encryption::cbc_decrypt_file;
 
-pub fn challenge10() -> Result<String, String>
-{
+pub fn challenge10() -> Result<String, String> {
     let filename = "10.txt";
-    let key = "YELLOW SUBMARINE".as_bytes();
+    let key = b"YELLOW SUBMARINE";
     let iv = &[0 as u8; 16];
 
     Ok(String::from_utf8(cbc_decrypt_file(filename, key, iv)).unwrap())

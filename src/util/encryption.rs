@@ -27,7 +27,7 @@ pub fn cbc_encrypt(plaintext: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
     let mut output: Vec<u8> = Vec::with_capacity(plaintext.len());
     for block in plaintext.chunks(16) {
         let mut result = vec![0; 16];
-        encryptor.encrypt_block(bytewise_xor(&block, &iv).as_slice(), &mut result);
+        encryptor.encrypt_block(bytewise_xor(block, &iv).as_slice(), &mut result);
         iv = result.clone();
         output.append(&mut result);
     }
@@ -60,20 +60,20 @@ pub fn cbc_decrypt_file(filename: &str, key: &[u8], iv: &[u8]) -> Vec<u8> {
 
 
 pub fn ecb_encrypt(plaintext: &[u8], key: &[u8]) -> Vec<u8> {
-    let encryptor = AesSafe128Encryptor::new(&key);
+    let encryptor = AesSafe128Encryptor::new(key);
     let mut output: Vec<u8> = Vec::with_capacity(plaintext.len());
     let plaintext = pkcs7_pad(plaintext, 16).unwrap();
 
     for block in plaintext.chunks(16) {
         let mut result = vec![0; 16];
-        encryptor.encrypt_block(&block, &mut result);
+        encryptor.encrypt_block(block, &mut result);
         output.append(&mut result);
     }
     output
 }
 
 pub fn ecb_decrypt(ciphertext: &[u8], key: &[u8]) -> Vec<u8> {
-    let decryptor = AesSafe128Decryptor::new(&key);
+    let decryptor = AesSafe128Decryptor::new(key);
     let mut padded_plaintext: Vec<u8> = Vec::with_capacity(ciphertext.len());
 
     for block in ciphertext.chunks(16) {

@@ -18,19 +18,24 @@
 ///
 ///     "YELLOW SUBMARINE\x04\x04\x04\x04"
 
-use util::pkcs7_pad_block;
+use util::pkcs7_pad;
 
-pub fn challenge9() -> Result<String, String>
-{
+pub fn challenge9() -> Result<String, String> {
     let input_block = "YELLOW SUBMARINE".as_bytes();
     let known_good = "YELLOW SUBMARINE\x04\x04\x04\x04".as_bytes();
     let desired_len = 20;
 
-    let padded = pkcs7_pad_block(input_block, 20).unwrap();
+    let padded = pkcs7_pad(input_block, 20).unwrap();
 
     if padded == known_good {
-        Ok(format!("Padded {:?} to {} bytes ok: {:?}", input_block, desired_len, padded))
+        Ok(format!("Padded {:?} to {} bytes ok: {:?}",
+                   input_block,
+                   desired_len,
+                   padded))
     } else {
-        Err(format!("{:?} does not pad {:?} to {} bytes correctly", padded, input_block, desired_len))
+        Err(format!("{:?} does not pad {:?} to {} bytes correctly",
+                    padded,
+                    input_block,
+                    desired_len))
     }
 }

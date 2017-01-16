@@ -6,28 +6,28 @@ extern crate cryptopals;
 
 use cryptopals::util::base64::FromBase64;
 
-fn check_success(challenge_num: u32, result: Result<String, String>)
-{
+fn check_success(challenge_num: u32, result: Result<String, String>) {
     match result {
-        Ok(output) => println!(
-            "Challenge {} okay! Got delicious output:\n{}\n----",
-            challenge_num,
-            output
-            ),
-        Err(errmsg) => panic!("Challenge {} returned an error!\n{}", challenge_num, errmsg)
+        Ok(output) => {
+            println!("Challenge {:?} okay! Got delicious output:\n{}\n----",
+                     challenge_num,
+                     output)
+        }
+        Err(errmsg) => panic!("Challenge {} returned an error!\n{}", challenge_num, errmsg),
     }
 }
 
-fn main()
-{
-    check_success(1, match cryptopals::challenge1() {
-        Ok(output) => Result::Ok(String::from_utf8(output.from_base64()).unwrap()),
-        Err(errstr) => Err(errstr)
-    });
-    check_success(2, match cryptopals::challenge2() {
-        Ok(output) => Result::Ok(String::from_utf8(output).unwrap()),
-        Err(errstr) => Err(errstr)
-    });
+fn main() {
+    check_success(1,
+                  match cryptopals::challenge1() {
+                      Ok(output) => Result::Ok(String::from_utf8(output.from_base64()).unwrap()),
+                      Err(errstr) => Err(errstr),
+                  });
+    check_success(2,
+                  match cryptopals::challenge2() {
+                      Ok(output) => Result::Ok(String::from_utf8(output).unwrap()),
+                      Err(errstr) => Err(errstr),
+                  });
     check_success(3, cryptopals::challenge3());
     check_success(4, cryptopals::challenge4());
     check_success(5, cryptopals::challenge5());

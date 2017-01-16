@@ -33,13 +33,14 @@ use util::encryption::{EncryptionMode, cbc_encrypt, ecb_encrypt};
 use util::oracles::detect_ecb;
 
 
-pub fn challenge11() -> Result<String, String>
-{
+pub fn challenge11() -> Result<String, String> {
     let test_string = vec!['A' as u8; 80];
     for _ in 0..100 {
         let (ciphertext, enc_mode) = stochastic_encrypt(test_string.as_slice());
         if enc_mode != detect_ecb(&ciphertext) {
-            return Err(format!("Did not detect that {:?} is encrypted in mode {:?}", ciphertext, enc_mode));
+            return Err(format!("Did not detect that {:?} is encrypted in mode {:?}",
+                               ciphertext,
+                               enc_mode));
         }
     }
     Ok(String::from("Didn't skip a beat! I know what's up 100% of the time."))
@@ -52,7 +53,7 @@ fn stochastic_encrypt(plaintext: &[u8]) -> (Vec<u8>, EncryptionMode) {
     // Construct the new plaintext that's had random bytes prepended and appended
     let padlen = (rng.gen::<usize>() % 6) + 5;
     let random_bytes = generate_key(padlen);
-    let mut padded_plaintext: Vec<u8> = Vec::with_capacity(plaintext.len() + 2*padlen);
+    let mut padded_plaintext: Vec<u8> = Vec::with_capacity(plaintext.len() + 2 * padlen);
     padded_plaintext.extend(random_bytes.iter());
     padded_plaintext.extend(plaintext.iter());
     padded_plaintext.extend(random_bytes.iter());

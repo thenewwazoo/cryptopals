@@ -6,15 +6,14 @@ pub trait FromBase64 {
 }
 
 impl FromBase64 for String {
-	fn from_base64(&self) -> Vec<u8> {
-		self
-			.chars()
-			.collect::<Vec<_>>()
-			.chunks(4)
-			.map(decode_b64_chunk)
-			.flat_map(|c| c.into_iter())
-			.collect::<Vec<u8>>()
-	}
+    fn from_base64(&self) -> Vec<u8> {
+        self.chars()
+            .collect::<Vec<_>>()
+            .chunks(4)
+            .map(decode_b64_chunk)
+            .flat_map(|c| c.into_iter())
+            .collect::<Vec<u8>>()
+    }
 }
 
 impl<'a> FromBase64 for &'a str {
@@ -29,10 +28,10 @@ pub trait ToBase64 {
 
 impl<'a> ToBase64 for &'a [u8] {
     fn to_base64(&self) -> String {
-        self
-            .chunks(3)
+        self.chunks(3)
             .map(|c| b64_map(c))
-            .fold(String::new(), |acc, c| acc + &c.iter().cloned().collect::<String>())
+            .fold(String::new(),
+                  |acc, c| acc + &c.iter().cloned().collect::<String>())
     }
 }
 
@@ -47,10 +46,9 @@ fn b64_map(bytes: &[u8]) -> [char; 4] {
     let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".as_bytes();
 
     // `triword` is a 24-bit representation of `bytes` (stored in a u32)
-    let triword: u32 = bytes
-        .iter()
+    let triword: u32 = bytes.iter()
         .zip([2, 1, 0].iter())
-        .map(|(&w,&s)| (w as u32) << (8*s))
+        .map(|(&w, &s)| (w as u32) << (8 * s))
         .fold(0, |acc, x| acc + x);
 
     // Mask the 6-bit portions of `triword`, and store them as indices into `alphabet`
@@ -58,12 +56,11 @@ fn b64_map(bytes: &[u8]) -> [char; 4] {
         .iter()
         .map(|s| (((triword & (0b111111u32 << s)) >> s) as u8))
         .enumerate()
-        .map(|(i, v)| if i <= bytes.len() {v as usize} else {64})
+        .map(|(i, v)| if i <= bytes.len() { v as usize } else { 64 })
         .collect();
 
     // Extract the characters from `alphabet` into a vector
-    let characters: Vec<char> = indices
-        .iter()
+    let characters: Vec<char> = indices.iter()
         .map(|&v| alphabet[v] as char)
         .collect();
     [characters[0], characters[1], characters[2], characters[3]]
@@ -73,13 +70,12 @@ fn decode_b64_chunk(input: &[char]) -> Vec<u8> {
     let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
     // Build a 32-bit value out of (up to) 4 base64 characters
-    let qw: u32 = input
-        .iter()
+    let qw: u32 = input.iter()
         .map(|&c| alphabet.find(c))
         .map(|r| r.expect("Invalid base64 character!") as u8)
         .enumerate()
-        .map(|(i, t)| (t as u32) << ((3-i)*6))
-        .fold(0, |acc, x| acc+x);
+        .map(|(i, t)| (t as u32) << ((3 - i) * 6))
+        .fold(0, |acc, x| acc + x);
 
     // For each of the three pairs of characters ABCD=>[AB, BC, CD]
     vec![(input[0], input[1]), (input[1], input[2]), (input[2],input[3])]

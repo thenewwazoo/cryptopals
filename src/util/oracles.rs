@@ -26,11 +26,11 @@ pub fn find_blocklen(enc: fn(&[u8], &[u8]) -> Vec<u8>) -> Result<usize, String> 
         detected_lengths.push(enc(&input, &key).len());
         detected_lengths.dedup();
     }
-    let mut sizes = detected_lengths.windows(2).map(|w| w[1]-w[0]).collect::<Vec<usize>>();
+    let mut sizes = detected_lengths.windows(2).map(|w| w[1] - w[0]).collect::<Vec<usize>>();
     sizes.dedup();
 
     match sizes.len() {
         1 => Ok(sizes[0]),
-        _ => Err(String::from("Could not converge on a block size"))
+        _ => Err(String::from("Could not converge on a block size")),
     }
 }

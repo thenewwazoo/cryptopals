@@ -297,9 +297,23 @@ fn challenge4() {
 /// this.
 #[test]
 fn challenge5() {
-    const INPUT: &str = "Burning 'em, if you ain't quick and nimble"
-                        "I go crazy when I hear a cymbal";
-    const OUTPUT: &str = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272"
-                         "a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+    use arse::transform::AsHex;
+
+    const INPUT: &str =
+        "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
+    const OUTPUT: &str = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
     const KEY: &str = "ICE";
+
+    let key_buf = KEY.bytes().cycle().take(INPUT.len()).collect::<Vec<u8>>();
+    let result = INPUT
+        .bytes()
+        .zip(key_buf.iter())
+        .map(|(i, k)| i ^ k)
+        .collect::<Vec<u8>>()
+        .as_hex();
+    assert_eq!(
+        OUTPUT, result,
+        "Result {} does not match {}",
+        result, OUTPUT
+    );
 }

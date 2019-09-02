@@ -272,7 +272,6 @@ fn challenge4() {
     };
 }
 
-
 /// Challenge 5
 ///
 /// Implement repeating-key XOR

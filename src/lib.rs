@@ -148,6 +148,47 @@ pub mod transform {
         }
     }
 
+    pub const BASE64_MAP: &[u8; 65] =
+        b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+    /// Decode the provided base64-encoded string into bytes
+    pub fn base64_decode(input: &str) -> Vec<u8> {
+        input
+            .trim_end_matches('=')
+            .as_bytes()
+            .chunks(4)
+            .flat_map(|chunk| {
+                fn lookup(a: u8) -> usize {
+                    BASE64_MAP.iter().position(|b| a.eq(b)).unwrap()
+                }
+
+                if chunk.len() == 1 {
+                    panic!("bad b64 str len");
+                }
+
+                let mut output: Vec<u8> = Vec::new();
+
+                output.push(((lookup(chunk[0]) & 0b11_1111) as u8) << 2); // first 6 bits
+
+                let c1 = lookup(chunk[1]);
+                output[0] |= ((c1 & 0b0011_0000) as u8) >> 4; // top 2 of second 6 bits
+
+                if let Some(c) = chunk.get(2) {
+                    output.push(((c1 & 0b0000_1111) as u8) << 4); // bottom 4 of second 6 bits
+                    let c2 = lookup(*c);
+                    output[1] |= ((c2 & 0b0011_1100) as u8) >> 2;
+                }
+
+                if let Some(d) = chunk.get(3) {
+                    output.push(((lookup(chunk[2]) & 0b0000_0011) as u8) << 6);
+                    output[2] |= (lookup(*d) & 0b0011_1111) as u8;
+                }
+
+                output.into_iter()
+            })
+            .collect::<Vec<u8>>()
+    }
+
     /// Encode the provided byte slice as base64.
     ///
     /// ```
@@ -158,21 +199,21 @@ pub mod transform {
     /// assert_eq!(base64_encode(&input), output);
     /// ```
     pub fn base64_encode(input: &[u8]) -> String {
-        const BASE64_MAP: &[u8; 65] =
-            b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
         input.chunks(3).fold(String::new(), |mut acc, ch| {
             // 24-bit chunks
 
             let first = (ch[0] & 0b1111_1100) >> 2;
 
-            let second = match ch.get(1) {
-                Some(c) => (ch[0] & 0b0000_0011) << 4 | (c & 0b1111_0000) >> 4,
-                None => 64,
-            };
+            let second = (ch[0] & 0b0000_0011) << 4;
+            let second = second
+                | match ch.get(1) {
+                    Some(c) => (c & 0b1111_0000) >> 4,
+                    None => 0b0000,
+                };
 
             let third = match (ch.get(1), ch.get(2)) {
                 (Some(c), Some(d)) => (c & 0b0000_1111) << 2 | (d & 0b1100_0000) >> 6,
+                (Some(c), None) => (c & 0b0000_1111) << 2,
                 (None, Some(_)) => unreachable!(),
                 (_, None) => 64,
             };
@@ -233,23 +274,65 @@ pub mod transform {
             })
     }
 
+    pub trait AsHex {
+        fn as_hex(self) -> String;
+    }
+
+    impl AsHex for Vec<u8> {
+        fn as_hex(self) -> String {
+            hex_encode(&self.as_slice())
+        }
+    }
+
 }
 
 mod test {
     #[test]
-    fn test_b64() {
+    fn test_b64_encode() {
         use crate::transform::base64_encode;
 
-        let input = [0xFF, 0xFF, 0xFF];
-        let output = "////";
-        assert_eq!(base64_encode(&input), output);
+        assert_eq!(
+            base64_encode(b"any carnal pleasure."),
+            String::from("YW55IGNhcm5hbCBwbGVhc3VyZS4=")
+        );
+        assert_eq!(
+            base64_encode(b"any carnal pleasure"),
+            String::from("YW55IGNhcm5hbCBwbGVhc3VyZQ==")
+        );
+        assert_eq!(
+            base64_encode(b"any carnal pleasur"),
+            String::from("YW55IGNhcm5hbCBwbGVhc3Vy")
+        );
+    }
 
-        let input = [0, 0, 0];
-        let output = "AAAA";
-        assert_eq!(base64_encode(&input), output);
+    #[test]
+    fn test_b64_decode() {
+        use crate::transform::base64_decode;
 
-        let input = [0, 0, 0, 0];
-        let output = "AAAAA===";
-        assert_eq!(base64_encode(&input), output);
+        assert_eq!(base64_decode("YW55IGNhcm5hbCBwbGVhcw"), b"any carnal pleas");
+
+        assert_eq!(
+            String::from_utf8(base64_decode("YW55IGNhcm5hbCBwbGVhcw==")).unwrap(),
+            "any carnal pleas".to_string()
+        );
+
+        assert_eq!(
+            String::from_utf8(base64_decode("YW55IGNhcm5hbCBwbGVhc3U=")).unwrap(),
+            "any carnal pleasu".to_string()
+        );
+
+        assert_eq!(
+            String::from_utf8(base64_decode("YW55IGNhcm5hbCBwbGVhc3U")).unwrap(),
+            "any carnal pleasu".to_string()
+        );
+
+        assert_eq!(
+            String::from_utf8(base64_decode("YW55IGNhcm5hbCBwbGVhc3Vy")).unwrap(),
+            "any carnal pleasur".to_string()
+        );
+
+        assert!(std::panic::catch_unwind(|| base64_decode("ABCDE===")).is_err());
+
+        assert!(std::panic::catch_unwind(|| base64_decode("ABCDE")).is_err());
     }
 }

@@ -342,6 +342,46 @@ fn challenge6() {
     assert_eq!(key, b"Terminator X: Bring the noise", "bad key");
 
     let result = &ctxt_bytes.xor_with(&key);
-    let result = String::from_utf8_lossy(result);
-    print!("{}", result);
+    let _result = String::from_utf8_lossy(result);
+    //print!("{}", result);
+}
+
+/// AES in ECB mode
+///
+/// The Base64-encoded content in [this file](data/7.txt) has been encrypted via AES-128 in ECB
+/// mode under the key
+///
+/// `YELLOW SUBMARINE`
+///
+/// (case-sensitive, without the quotes; exactly 16 characters; I like "YELLOW SUBMARINE" because
+/// it's exactly 16 bytes long, and now you do too).
+///
+/// Decrypt it. You know the key, after all.
+///
+/// Easiest way: use OpenSSL::Cipher and give it AES-128-ECB as the cipher.
+///
+/// > Do this with code.
+/// >
+/// > You can obviously decrypt this using the OpenSSL command-line tool,
+/// > but we're having you get > ECB working in code for a reason. You'll need it a lot later on, and
+/// > not just for attacking > ECB.
+#[test]
+fn challenge7() {
+    use aes::Aes128;
+    use arse::encode::base64::TryFromBase64;
+    use block_modes::block_padding::Pkcs7;
+    use block_modes::{BlockMode, Ecb};
+
+    const KEY: &[u8] = b"YELLOW SUBMARINE";
+
+    let mut ciphertext = include_str!("data/7.txt").to_string();
+    ciphertext.retain(|c| !c.is_whitespace());
+    let ciphertext = ciphertext.try_from_base64().unwrap();
+
+    type Aes128Ecb = Ecb<Aes128, Pkcs7>;
+
+    let cipher = Aes128Ecb::new_var(KEY, Default::default()).unwrap();
+
+    let decrypted = cipher.decrypt_vec(&ciphertext).unwrap();
+    let _decrypted = String::from_utf8_lossy(&decrypted).to_owned();
 }

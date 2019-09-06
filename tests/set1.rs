@@ -83,45 +83,11 @@ fn challenge3() {
     use arse::stat::Histogram;
     use arse::transform::TryFixedXor;
     use arse::xor_cipher::score_byte_decode;
-    use std::collections::HashMap;
-    use std::{f64, u8};
+    use std::u8;
 
     const CIPHERTEXT: &str = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 
-    let english: Histogram<char> = Histogram(
-        [
-            ('e', 0.12702),
-            ('t', 0.09056),
-            ('a', 0.08167),
-            ('o', 0.07507),
-            ('i', 0.06966),
-            ('n', 0.06749),
-            ('s', 0.06327),
-            ('h', 0.06094),
-            ('r', 0.05987),
-            ('d', 0.04253),
-            ('l', 0.04025),
-            ('c', 0.02782),
-            ('u', 0.02758),
-            ('m', 0.02406),
-            ('w', 0.02360),
-            ('f', 0.02228),
-            ('g', 0.02015),
-            ('y', 0.01974),
-            ('p', 0.01929),
-            ('b', 0.01492),
-            ('v', 0.00978),
-            ('k', 0.00772),
-            ('j', 0.00153),
-            ('x', 0.00150),
-            ('q', 0.00095),
-            ('z', 0.00074),
-            ('\u{0}', f64::MAX),
-        ]
-        .into_iter()
-        .cloned()
-        .collect::<HashMap<char, f64>>(),
-    );
+    let english = Histogram::english();
 
     let ctext_bytes = CIPHERTEXT.try_from_hex().unwrap();
 
@@ -153,42 +119,9 @@ fn challenge4() {
     use arse::stat::Histogram;
     use arse::transform::TryFixedXor;
     use arse::xor_cipher::score_byte_decode;
-    use std::collections::HashMap;
     use std::{f64, u8};
 
-    let english: Histogram<char> = Histogram(
-        [
-            ('e', 0.12702),
-            ('t', 0.09056),
-            ('a', 0.08167),
-            ('o', 0.07507),
-            ('i', 0.06966),
-            ('n', 0.06749),
-            ('s', 0.06327),
-            ('h', 0.06094),
-            ('r', 0.05987),
-            ('d', 0.04253),
-            ('l', 0.04025),
-            ('c', 0.02782),
-            ('u', 0.02758),
-            ('m', 0.02406),
-            ('w', 0.02360),
-            ('f', 0.02228),
-            ('g', 0.02015),
-            ('y', 0.01974),
-            ('p', 0.01929),
-            ('b', 0.01492),
-            ('v', 0.00978),
-            ('k', 0.00772),
-            ('j', 0.00153),
-            ('x', 0.00150),
-            ('q', 0.00095),
-            ('z', 0.00074),
-        ]
-        .into_iter()
-        .cloned()
-        .collect::<HashMap<char, f64>>(),
-    );
+    let english = Histogram::english();
 
     let search_result: Option<(String, f64)> =
         include_str!("data/4.txt")
@@ -355,43 +288,9 @@ fn challenge6() {
     use arse::transform::XorWith;
     use arse::xor_cipher::{find_best_in, score_byte_decode};
     use hamming::distance;
-    use std::collections::HashMap;
     use std::{f64, u8};
 
-    let english: Histogram<char> = Histogram(
-        [
-            ('e', 0.12702),
-            ('t', 0.09056),
-            ('a', 0.08167),
-            ('o', 0.07507),
-            ('i', 0.06966),
-            ('n', 0.06749),
-            ('s', 0.06327),
-            ('h', 0.06094),
-            ('r', 0.05987),
-            ('d', 0.04253),
-            ('l', 0.04025),
-            ('c', 0.02782),
-            ('u', 0.02758),
-            ('m', 0.02406),
-            ('w', 0.02360),
-            ('f', 0.02228),
-            ('g', 0.02015),
-            ('y', 0.01974),
-            ('p', 0.01929),
-            ('b', 0.01492),
-            ('v', 0.00978),
-            ('k', 0.00772),
-            ('j', 0.00153),
-            ('x', 0.00150),
-            ('q', 0.00095),
-            ('z', 0.00074),
-            ('\u{0}', f64::MAX),
-        ]
-        .into_iter()
-        .cloned()
-        .collect::<HashMap<char, f64>>(),
-    );
+    let english = Histogram::english();
 
     let mut ciphertext = include_str!("data/6.txt").to_string();
     ciphertext.retain(|c| !c.is_whitespace());
@@ -440,14 +339,7 @@ fn challenge6() {
     });
 
     // value determined experimentally and validated manually :)
-    assert_eq!(
-        key,
-        &[
-            84, 101, 114, 109, 105, 110, 97, 116, 111, 114, 32, 88, 58, 32, 66, 114, 105, 110, 103,
-            32, 116, 104, 101, 32, 110, 111, 105, 115, 101,
-        ],
-        "bad key"
-    );
+    assert_eq!(key, b"Terminator X: Bring the noise", "bad key");
 
     let result = &ctxt_bytes.xor_with(&key);
     let result = String::from_utf8_lossy(result);

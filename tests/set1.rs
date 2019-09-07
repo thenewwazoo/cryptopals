@@ -82,8 +82,9 @@ fn challenge3() {
     use arse::encode::hex::TryFromHex;
     use arse::stat::Histogram;
     use arse::transform::TryFixedXor;
+    use arse::xor_cipher::find_best_in;
     use arse::xor_cipher::score_byte_decode;
-    use std::u8;
+    use std::{f64, u8};
 
     const CIPHERTEXT: &str = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 
@@ -91,11 +92,11 @@ fn challenge3() {
 
     let ctext_bytes = CIPHERTEXT.try_from_hex().unwrap();
 
-    use arse::xor_cipher::find_best_in;
-
-    let best_byte = find_best_in(0u8..u8::MAX, |&test_byte| {
-        score_byte_decode(test_byte, &ctext_bytes, &english).ok()
-    })
+    let best_byte = find_best_in(
+        0u8..u8::MAX,
+        |&test_byte| score_byte_decode(test_byte, &ctext_bytes, &english).ok(),
+        f64::lt,
+    )
     .unwrap();
     let key = vec![best_byte; ctext_bytes.len()];
     let cleartext = &ctext_bytes
@@ -304,21 +305,25 @@ fn challenge6() {
         37
     );
 
-    let best_keysize = find_best_in(2..45, |&keylen| {
-        Some(
-            ctxt_bytes
-                .chunks(keylen)
-                .zip(ctxt_bytes[keylen..].chunks(keylen))
-                .fold(0.0, |sum, (pre, post)| {
-                    if pre.len() == post.len() {
-                        sum + (distance(pre, post) as f64 / keylen as f64)
-                    } else {
-                        sum
-                    }
-                })
-                / ((ctxt_bytes.len() / keylen) as f64),
-        )
-    })
+    let best_keysize = find_best_in(
+        2..45,
+        |&keylen| {
+            Some(
+                ctxt_bytes
+                    .chunks(keylen)
+                    .zip(ctxt_bytes[keylen..].chunks(keylen))
+                    .fold(0.0, |sum, (pre, post)| {
+                        if pre.len() == post.len() {
+                            sum + (distance(pre, post) as f64 / keylen as f64)
+                        } else {
+                            sum
+                        }
+                    })
+                    / ((ctxt_bytes.len() / keylen) as f64),
+            )
+        },
+        f64::lt,
+    )
     .unwrap();
 
     assert!(best_keysize != 0, "Did not find a useful key size");
@@ -330,9 +335,11 @@ fn challenge6() {
 
     let key = buffers.iter().fold(Vec::new(), |mut acc, buffer| {
         acc.push(
-            find_best_in(0u8..u8::MAX, |&test_byte| {
-                score_byte_decode(test_byte, &buffer, &english).ok()
-            })
+            find_best_in(
+                0u8..u8::MAX,
+                |&test_byte| score_byte_decode(test_byte, &buffer, &english).ok(),
+                f64::lt,
+            )
             .unwrap(),
         );
         acc
@@ -384,4 +391,42 @@ fn challenge7() {
 
     let decrypted = cipher.decrypt_vec(&ciphertext).unwrap();
     let _decrypted = String::from_utf8_lossy(&decrypted).to_owned();
+}
+
+/// Detect AES in ECB mode
+///
+/// In [this file](data/8.txt) are a bunch of hex-encoded ciphertexts.
+///
+/// One of them has been encrypted with ECB.
+///
+/// Detect it.
+///
+/// Remember that the problem with ECB is that it is stateless and deterministic; the same 16 byte
+/// plaintext block will always produce the same 16 byte ciphertext.
+#[test]
+fn challenge8() {
+    use arse::encode::hex::TryFromHex;
+    use arse::xor_cipher::find_best_in;
+    use std::collections::HashMap;
+    use std::usize;
+
+    let best_line_no = find_best_in(
+        include_str!("data/8.txt")
+            .lines()
+            .map(|line| line.try_from_hex().unwrap())
+            .enumerate(),
+        |(_, line)| {
+            let mut count_map: HashMap<&[u8], usize> = HashMap::new();
+            for c in line.chunks(16) {
+                let counter = count_map.entry(c).or_insert(0usize);
+                *counter += 1;
+            }
+            let total_blocks_seen: usize = count_map.values().sum();
+            Some(total_blocks_seen - count_map.len())
+        },
+        usize::gt,
+    );
+
+    // value determined experimentally
+    assert_eq!(best_line_no.unwrap().0, 132);
 }

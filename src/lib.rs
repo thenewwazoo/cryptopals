@@ -5,6 +5,8 @@ pub mod xor_cipher {
     use super::transform::TryFixedXor;
     use std::f64;
 
+    /// Bytewise XOR `ciphertext` with `test_byte`, and then measure the chi-square goodness of fit
+    /// of the resulting output with `language`.
     pub fn score_byte_decode(
         test_byte: u8,
         ciphertext: &[u8],
@@ -50,23 +52,53 @@ pub mod xor_cipher {
         }
     }
 
-    pub fn find_best_in<I, F, T>(r: I, score_fn: F) -> Option<T>
+    /// Look through the iterator, scoring each, and using `cmp` to find the best.
+    ///
+    /// This function repeatedly calls `score_fn` on each element in `r`. It then calls `cmp` with
+    /// the last, best item found. If `cmp` returns true, it keeps the new element, else it keeps
+    /// the last one.
+    ///
+    /// If `score_fn` returns `None`, the last, best score is kept. If `score_fn` only ever returns
+    /// `None`, this function returns `None`.
+    ///
+    /// ```
+    /// use arse::xor_cipher::find_best_in;
+    /// use std::usize;
+    ///
+    /// let words = ["hello", "goodbye", "hola", "adios", "!!!"];
+    /// let letter = 'o';
+    /// let most = find_best_in(
+    ///     words.into_iter(),
+    ///     |w| Some(w.chars().filter(|c| *c == letter).count()),
+    ///     usize::gt
+    /// );
+    /// assert_eq!(most.unwrap(), &"goodbye");
+    /// ```
+    pub fn find_best_in<I, F, G, T, S>(r: I, score_fn: F, cmp: G) -> Option<T>
     where
         I: Iterator<Item = T>,
-        F: Fn(&T) -> Option<f64>,
+        F: Fn(&T) -> Option<S>,
+        G: Fn(&S, &S) -> bool,
     {
-        r.fold(None, |best_score: Option<(T, f64)>, test_val: T| {
-            match (score_fn(&test_val), &best_score) {
-                // compare this new score with a prior best score
-                (Some(score), Some((_, best_score_val))) => {
-                    if score < *best_score_val {
-                        Some((test_val, score))
+        r.fold(None, |best_score: Option<(T, S)>, test_val: T| {
+            let score = score_fn(&test_val);
+
+            // the following code is a bit contorted because we can't bind by-move and by-ref at
+            // the same time if the first match arm were to read:
+            //  (Some(score), Some((_, best_score_val))) => {
+            //          ^- by-move            ^- by-ref
+            // So instead we match against a reference, destructure into a new binding, and unwrap
+            // the original value to move it since we know it's valid.
+            match (&score, &best_score) {
+                (Some(inner), Some((_, best_score_val))) => {
+                    if cmp(inner, best_score_val) {
+                        Some((test_val, score.unwrap()))
                     } else {
                         best_score
                     }
                 }
                 // we haven't found a reasonable score yet, so this is the best
-                (Some(score), None) => Some((test_val, score)),
+                (Some(_), None) => Some((test_val, score.unwrap())),
                 // We couldn't score this one, so take whatever we've had before (even if it's None)
                 (None, _) => best_score,
             }

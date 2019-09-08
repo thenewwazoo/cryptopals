@@ -289,4 +289,32 @@ pub mod transform {
         }
     }
 
+    /// Indication that the PKCS#7 padding operation failed
+    #[derive(Debug)]
+    pub struct Pkcs7PadErr;
+
+    use std::u8;
+
+    /// Pad the input to length `len` with a repeated byte value equal to the number of padding
+    /// bytes added. Returns an error if more than 255 padding bytes would be added.
+    ///
+    /// ```
+    /// use arse::transform::pkcs7_pad;
+    ///
+    /// assert_eq!(
+    ///     pkcs7_pad(b"YELLOW SUBMARINE".to_vec(), 20).unwrap(),
+    ///     b"YELLOW SUBMARINE\x04\x04\x04\x04".to_vec()
+    ///     );
+    /// assert!(pkcs7_pad(b"too much padding".to_vec(), 1024).is_err());
+    /// ```
+    pub fn pkcs7_pad(mut input: Vec<u8>, len: usize) -> Result<Vec<u8>, Pkcs7PadErr> {
+        if len > usize::from(u8::MAX) {
+            return Err(Pkcs7PadErr);
+        }
+
+        let pad_len = len - input.len();
+        input.append(&mut vec![pad_len as u8; pad_len]);
+        Ok(input)
+    }
+
 }

@@ -1,13 +1,13 @@
+/// Modules and traits useful for encoding or decoding data, changing only its representation.
+
+/// Base64-related traits
 pub mod base64 {
 
-    pub const BASE64_MAP: &[u8; 65] =
+    const BASE64_MAP: &[u8; 65] =
         b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
+    /// Encode some bytes as a base64 `String`
     pub trait ToBase64 {
-        fn to_base64(self) -> String;
-    }
-
-    impl ToBase64 for &[u8] {
         /// Encode the provided byte slice as base64.
         ///
         /// ```
@@ -17,6 +17,10 @@ pub mod base64 {
         /// let output = "AAAB";
         /// assert_eq!(input.to_base64(), output);
         /// ```
+        fn to_base64(self) -> String;
+    }
+
+    impl ToBase64 for &[u8] {
         fn to_base64(self) -> String {
             self.chunks(3)
                 .flat_map(|ch| {
@@ -71,14 +75,18 @@ pub mod base64 {
         }
     }
 
+    /// Base64 decoding has failed
     #[derive(Debug)]
     pub enum Base64Error {
+        /// A non-base64 byte was discovered in the input
         BadCharacter(u8),
+        /// The input string is an invalid length to be base64-encoded data
         Length,
     }
 
     /// Things that can be decoded from strings into bytes
     pub trait TryFromBase64 {
+        /// Attempt to decode a base64-encoded string into its bytes.
         fn try_from_base64(self) -> Result<Vec<u8>, Base64Error>;
     }
 
@@ -193,9 +201,11 @@ mod test {
     }
 }
 
+/// Hex-related traits
 pub mod hex {
     use std::num::ParseIntError;
 
+    /// Attempt to decode a String into the bytes it encodes
     pub trait TryFromHex {
         /// Decode the given hex-encoded UTF-8 string into bytes
         ///
@@ -226,9 +236,12 @@ pub mod hex {
         }
     }
 
+    /// Indication that decoding has failed
     #[derive(Debug)]
     pub enum HexError {
+        /// A non-hex character was found in the input
         BadCharacter,
+        /// The input is an invalid length
         Length,
     }
 

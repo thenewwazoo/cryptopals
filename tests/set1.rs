@@ -80,9 +80,8 @@ fn challenge2() {
 #[test]
 fn challenge3() {
     use arse::encode::hex::TryFromHex;
-    use arse::stat::Histogram;
+    use arse::stat::{find_best_in, Histogram};
     use arse::transform::TryFixedXor;
-    use arse::xor_cipher::find_best_in;
     use arse::xor_cipher::score_byte_decode;
     use std::{f64, u8};
 
@@ -285,9 +284,9 @@ fn challenge5() {
 #[test]
 fn challenge6() {
     use arse::encode::base64::TryFromBase64;
-    use arse::stat::Histogram;
+    use arse::stat::{find_best_in, Histogram};
     use arse::transform::XorWith;
-    use arse::xor_cipher::{find_best_in, score_byte_decode};
+    use arse::xor_cipher::score_byte_decode;
     use hamming::distance;
     use std::{f64, u8};
 
@@ -406,7 +405,7 @@ fn challenge7() {
 #[test]
 fn challenge8() {
     use arse::encode::hex::TryFromHex;
-    use arse::xor_cipher::find_best_in;
+    use arse::stat::find_best_in;
     use std::collections::HashMap;
     use std::usize;
 

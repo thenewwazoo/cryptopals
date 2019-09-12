@@ -2,6 +2,7 @@
 ///
 /// Written whilst leading the *A*spiring *R*ustacean *S*ocial *E*ducation group within LinkedIn
 pub mod encode;
+pub mod encrypt;
 pub mod stat;
 pub mod transform;
 

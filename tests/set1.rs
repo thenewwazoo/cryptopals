@@ -106,7 +106,7 @@ fn challenge3() {
     println!("Using value {:X}, decoded string: {}", best_byte, cleartext);
 }
 
-/// Detect single-character XOR
+/// # Detect single-character XOR
 ///
 /// One of the 60-character strings in [this file](data/4.txt) has been encrypted by single-character XOR.
 ///
@@ -182,9 +182,7 @@ fn challenge4() {
     };
 }
 
-/// Challenge 5
-///
-/// Implement repeating-key XOR
+/// # Implement repeating-key XOR
 ///
 /// Here is the opening stanza of an important work of the English language:
 ///
@@ -224,9 +222,7 @@ fn challenge5() {
     );
 }
 
-/// Challenge 6
-///
-/// Break repeating-key XOR
+/// # Break repeating-key XOR
 ///
 /// It is officially on, now.
 ///
@@ -352,7 +348,7 @@ fn challenge6() {
     //print!("{}", result);
 }
 
-/// AES in ECB mode
+/// # AES in ECB mode
 ///
 /// The Base64-encoded content in [this file](data/7.txt) has been encrypted via AES-128 in ECB
 /// mode under the key
@@ -368,9 +364,9 @@ fn challenge6() {
 ///
 /// > Do this with code.
 /// >
-/// > You can obviously decrypt this using the OpenSSL command-line tool,
-/// > but we're having you get > ECB working in code for a reason. You'll need it a lot later on, and
-/// > not just for attacking > ECB.
+/// > You can obviously decrypt this using the OpenSSL command-line tool, but we're having you get
+/// > ECB working in code for a reason. You'll need it a lot later on, and not just for attacking
+/// > ECB.
 #[test]
 fn challenge7() {
     use aes::Aes128;
@@ -392,7 +388,7 @@ fn challenge7() {
     let _decrypted = String::from_utf8_lossy(&decrypted).to_owned();
 }
 
-/// Detect AES in ECB mode
+/// # Detect AES in ECB mode
 ///
 /// In [this file](data/8.txt) are a bunch of hex-encoded ciphertexts.
 ///

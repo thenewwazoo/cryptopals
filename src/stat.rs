@@ -45,7 +45,7 @@ impl Histogram<char> {
                 ('z', 0.00074),
                 ('\u{0}', f64::MAX),
             ]
-            .into_iter()
+            .iter()
             .cloned()
             .collect::<HashMap<char, f64>>(),
         )
